@@ -12,6 +12,7 @@ namespace UnitedTechCase.Scripts.Managers
 
         public event Action<ISpecialPower> OnPowerAdded;
         public event Action<ISpecialPower> OnPowerRemoved;
+        public event Action OnMaxPowersReached;
 
         public void SelectPower(ISpecialPower power)
         {
@@ -23,6 +24,10 @@ namespace UnitedTechCase.Scripts.Managers
 
             _activePowers.Add(power);
             OnPowerAdded?.Invoke(power);
+            if (_activePowers.Count == MaxPowers)
+            {
+                OnMaxPowersReached?.Invoke();
+            }
         }
 
         public void ResetPowers()

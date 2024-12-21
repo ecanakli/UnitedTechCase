@@ -57,6 +57,8 @@ namespace UnitedTechCase.Scripts.Managers
                 specialPowerButton.Button.onClick.AddListener(() =>
                     OnSpecialPowerButtonClicked(specialPowerButton.Power));
             }
+
+            _specialPowerManager.OnMaxPowersReached += DisableAllSpecialPowerButtons;
         }
 
         private void RemoveListeners()
@@ -68,11 +70,40 @@ namespace UnitedTechCase.Scripts.Managers
             {
                 specialPowerButton.Button.onClick.RemoveAllListeners();
             }
+
+            _specialPowerManager.OnMaxPowersReached -= DisableAllSpecialPowerButtons;
         }
 
         private void OnSpecialPowerButtonClicked(ISpecialPower power)
         {
             _specialPowerManager.SelectPower(power);
+
+            foreach (var specialPowerButton in specialPowerButtons)
+            {
+                if (specialPowerButton.Power == power)
+                {
+                    specialPowerButton.OnClicked();
+                }
+            }
+        }
+
+        private void SetAllButtonsInteractable(bool state)
+        {
+            foreach (var specialPowerButton in specialPowerButtons)
+            {
+                if (specialPowerButton.Button.interactable != state)
+                {
+                    specialPowerButton.SetInteractable(true);
+                }
+            }
+        }
+
+        private void DisableAllSpecialPowerButtons()
+        {
+            foreach (var specialPowerButton in specialPowerButtons)
+            {
+                specialPowerButton.SetInteractable(false);
+            }
         }
 
         private void CacheUIElements()
@@ -140,6 +171,7 @@ namespace UnitedTechCase.Scripts.Managers
             _animationCancellationToken = new CancellationTokenSource();
             OnGameRestart?.Invoke();
             endButton.enabled = false;
+            DisableAllSpecialPowerButtons();
 
             await PlayAnimation(
                 _endButtonRectTransform,
@@ -163,6 +195,7 @@ namespace UnitedTechCase.Scripts.Managers
                 Ease.InOutQuad);
 
             startButton.enabled = true;
+            ResetUIButtons();
         }
 
         private async UniTask PlayAnimation(RectTransform target, Vector2 targetPosition, float duration, Ease easeType)
@@ -172,6 +205,11 @@ namespace UnitedTechCase.Scripts.Managers
                 .SetEase(easeType)
                 .AsyncWaitForCompletion().AsUniTask()
                 .AttachExternalCancellation(_animationCancellationToken.Token);
+        }
+
+        private void ResetUIButtons()
+        {
+            SetAllButtonsInteractable(true);
         }
 
         private void OnDestroy()

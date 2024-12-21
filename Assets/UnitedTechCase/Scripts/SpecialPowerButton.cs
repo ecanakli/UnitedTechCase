@@ -15,5 +15,15 @@ namespace UnitedTechCase.Scripts
         private ScriptableObject powerData;
 
         public ISpecialPower Power => powerData as ISpecialPower;
+
+        public void OnClicked()
+        {
+            SetInteractable(false);
+        }
+
+        public void SetInteractable(bool state)
+        {
+            button.interactable = state;
+        }
     }
 }
