@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b9302aa1ccde15844b8d26038d2ed11e, type: 3}
-  m_Name: GameState
+  m_Name: GameData
   m_EditorClassIdentifier: 
   baseFireRate: 2
   baseBulletSpeed: 25
   doubleShotEnabled: 0
   extraBullets: 0
   characterDuplicated: 0
-  BulletData: {fileID: 11400000, guid: ad91ba4570811244281459db941aed1e, type: 2}
+  bulletData: {fileID: 11400000, guid: ad91ba4570811244281459db941aed1e, type: 2}

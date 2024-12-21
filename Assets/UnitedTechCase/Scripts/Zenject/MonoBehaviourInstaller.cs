@@ -21,15 +21,12 @@ namespace UnitedTechCase.Scripts.Zenject
 
         [Header("Scriptable Objects")]
         [SerializeField]
-        private ScriptableObject bulletData;
-
-        [SerializeField]
         private ScriptableObject gameData;
 
         public override void InstallBindings()
         {
             InstallInstanceManagers();
-            InstallScriptableObjects();
+            InstallRuntimeScriptableObjects();
         }
 
         private void InstallInstanceManagers()
@@ -40,10 +37,11 @@ namespace UnitedTechCase.Scripts.Zenject
             Container.Bind<SpecialPowerManager>().FromInstance(specialPowerManager).AsSingle().NonLazy();
         }
 
-        private void InstallScriptableObjects()
+        private void InstallRuntimeScriptableObjects()
         {
-            Container.Bind<BulletData>().FromScriptableObject((BulletData) bulletData).AsSingle().NonLazy();
-            Container.Bind<GameData>().FromScriptableObject((GameData) gameData).AsSingle().NonLazy();
+            var runtimeGameData = Instantiate((GameData) gameData);
+            runtimeGameData.Initialize();
+            Container.Bind<GameData>().FromInstance(runtimeGameData).AsSingle().NonLazy();
         }
     }
 }

@@ -10,13 +10,7 @@ namespace UnitedTechCase.Scripts
         private float baseFireRate = 2f;
 
         [SerializeField]
-        private float baseBulletSpeed = 25f;
-
-        [SerializeField]
         private bool doubleShotEnabled;
-
-        [SerializeField]
-        private int extraBullets;
 
         [SerializeField]
         private bool characterDuplicated;
@@ -25,24 +19,25 @@ namespace UnitedTechCase.Scripts
         [SerializeField]
         private BulletData bulletData;
 
+        private BulletData _runtimeBulletData;
+
+        public BulletData BulletData => _runtimeBulletData;
+
+        public void Initialize()
+        {
+            _runtimeBulletData = Instantiate(bulletData);
+        }
+
         public float BaseFireRate
         {
             get => baseFireRate;
             set => baseFireRate = value;
         }
 
-        public float BaseBulletSpeed => baseBulletSpeed;
-
         public bool DoubleShotEnabled
         {
             get => doubleShotEnabled;
             set => doubleShotEnabled = value;
-        }
-
-        public int ExtraBullets
-        {
-            get => extraBullets;
-            set => extraBullets = value;
         }
 
         public bool CharacterDuplicated
@@ -51,15 +46,11 @@ namespace UnitedTechCase.Scripts
             set => characterDuplicated = value;
         }
 
-        public BulletData BulletData => bulletData;
-
         public void ResetToDefault()
         {
-            bulletData.ResetToDefaultValues();
+            BulletData.ResetToDefaultValues();
             baseFireRate = 2f;
-            baseBulletSpeed = 25f;
             doubleShotEnabled = false;
-            extraBullets = 0;
             characterDuplicated = false;
         }
     }

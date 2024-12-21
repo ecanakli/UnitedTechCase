@@ -8,11 +8,11 @@ namespace UnitedTechCase.Scripts
     public class ExtraBulletsPower : ScriptableObject, ISpecialPower
     {
         [SerializeField]
-        private int bulletMultiplier = 2;
+        private int extraBulletCount = 2;
 
         public void OnPowerAdded(GameManager gameManager, GameData gameData)
         {
-            gameData.ExtraBullets *= bulletMultiplier;
+            gameData.BulletData.ExtraBullets = extraBulletCount;
         }
     }
 

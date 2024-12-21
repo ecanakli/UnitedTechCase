@@ -50,12 +50,12 @@ namespace UnitedTechCase.Scripts
 
         private void CheckExtraBulletSpecialPower()
         {
-            if (_gameData.ExtraBullets <= 0)
+            if (_gameData.BulletData.ExtraBullets <= 0)
             {
                 return;
             }
 
-            for (var i = 0; i < _gameData.ExtraBullets; i++)
+            for (var i = 0; i < _gameData.BulletData.ExtraBullets; i++)
             {
                 var angle = (i == 0) ? -45f : 45f;
                 var rotation = Quaternion.Euler(firePoint.rotation.eulerAngles + new Vector3(0, angle, 0));
