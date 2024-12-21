@@ -26,7 +26,7 @@ namespace UnitedTechCase.Scripts.Managers
         private readonly Vector3 _characterSpawnPosition = new(0f, 0f, 2.13f);
         private readonly Vector3 _characterCenterPosition = new(0f, 0f, -13.41f);
 
-        private readonly List<Character> _characters = new();
+        private readonly List<Character> _activeCharacters = new();
         private readonly List<Bullet> _bullets = new();
 
         public event Action OnGameSequenceStarted;
@@ -85,11 +85,7 @@ namespace UnitedTechCase.Scripts.Managers
         private Character SpawnCharacter(Vector3 spawnPosition, Quaternion rotation)
         {
             var character = _objectPoolManager.Spawn<Character>(spawnPosition, rotation);
-            if (_characters.Count != InitializeCharacterSize)
-            {
-                _characters.Add(character);
-            }
-
+            _activeCharacters.Add(character);
             character.Initialize(_gameData);
             return character;
         }
@@ -109,18 +105,18 @@ namespace UnitedTechCase.Scripts.Managers
 
         private void StartCharacterFiring()
         {
-            _characters[0].StartFiring();
+            _activeCharacters[0].StartFiring();
             OnGameSequenceStarted?.Invoke();
         }
 
         private void OnRestart()
         {
-            foreach (var character in _characters)
+            foreach (var character in _activeCharacters)
             {
                 character.OnGameEnd(_characterSpawnPosition);
             }
 
-            _characters.Clear();
+            _activeCharacters.Clear();
             _gameData.ResetToDefault();
             _specialPowerManager.ResetPowers();
             OnGameSequenceRestarted?.Invoke();
@@ -129,7 +125,7 @@ namespace UnitedTechCase.Scripts.Managers
         private void HandlePowerAdded(ISpecialPower power)
         {
             power.OnPowerAdded(this, _gameData);
-            foreach (var character in _characters)
+            foreach (var character in _activeCharacters)
             {
                 character.Initialize(_gameData);
             }

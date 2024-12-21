@@ -22,7 +22,7 @@ namespace UnitedTechCase.Scripts
 
         public void StartFiring()
         {
-            _fireCancellationTokenSource?.Cancel();
+            CancelFire();
             _fireCancellationTokenSource = new CancellationTokenSource();
             FireContinuously(_fireCancellationTokenSource.Token).Forget();
         }
@@ -88,25 +88,46 @@ namespace UnitedTechCase.Scripts
 
         public async void OnGameEnd(Vector3 movePosition)
         {
+            CancelFire();
             await Move(movePosition);
             ReturnToPool();
         }
 
         public async UniTask Move(Vector3 movePosition)
         {
-            _moveCancellationTokenSource?.Cancel();
+            CancelMove();
             _moveCancellationTokenSource = new CancellationTokenSource();
+            RotateTowards(movePosition, _moveCancellationTokenSource.Token).Forget();
             await transform.DOMove(movePosition, 0.5f)
                 .SetEase(Ease.Linear)
                 .AsyncWaitForCompletion().AsUniTask().AttachExternalCancellation(_moveCancellationTokenSource.Token);
         }
 
+        private async UniTask RotateTowards(Vector3 targetPosition, CancellationToken cancellationToken)
+        {
+            var direction = (targetPosition - transform.position).normalized;
+            var targetRotation = Quaternion.LookRotation(direction).eulerAngles;
+
+            await transform.DORotate(targetRotation, 0.3f, RotateMode.FastBeyond360)
+                .SetEase(Ease.InOutQuad)
+                .AsyncWaitForCompletion().AsUniTask().AttachExternalCancellation(cancellationToken);
+        }
+
+        private void CancelMove()
+        {
+            _moveCancellationTokenSource?.Cancel();
+        }
+
+        private void CancelFire()
+        {
+            _fireCancellationTokenSource?.Cancel();
+        }
 
         public override void OnDeSpawned()
         {
             base.OnDeSpawned();
-            _moveCancellationTokenSource?.Cancel();
-            _fireCancellationTokenSource?.Cancel();
+            CancelFire();
+            CancelMove();
         }
 
         private void OnDestroy()
