@@ -16,6 +16,10 @@ namespace UnitedTechCase.Scripts
         [SerializeField]
         private int extraBullets;
 
+        private float _defaultSpeed;
+        private Vector3 _defaultDirection;
+        private int _defaultExtraBullets;
+
         public float Speed
         {
             get => speed;
@@ -34,6 +38,25 @@ namespace UnitedTechCase.Scripts
             private set => extraBullets = value;
         }
 
+        private void OnEnable()
+        {
+            CacheDefaultValues();
+        }
+
+        private void CacheDefaultValues()
+        {
+            _defaultSpeed = speed;
+            _defaultDirection = direction;
+            _defaultExtraBullets = extraBullets;
+        }
+
+        public void ResetToDefaultValues()
+        {
+            Speed = _defaultSpeed;
+            Direction = _defaultDirection;
+            ExtraBullets = _defaultExtraBullets;
+        }
+
         public void ModifySpeed(float multiplier)
         {
             Speed *= multiplier;
@@ -47,13 +70,6 @@ namespace UnitedTechCase.Scripts
         public void ModifyDirection(Vector3 newDirection)
         {
             Direction = newDirection.normalized;
-        }
-
-        public void ResetToDefaultValues()
-        {
-            Speed = 25f;
-            ExtraBullets = 0;
-            Direction = Vector3.back;
         }
     }
 }
