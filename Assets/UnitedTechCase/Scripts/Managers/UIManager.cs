@@ -34,8 +34,8 @@ namespace UnitedTechCase.Scripts.Managers
 
         private CancellationTokenSource _animationCancellationToken;
 
-        public event Action OnStartButtonMovedOffScreen;
-        public event Action OnGameRestart;
+        public event Action OnGameSequenceStart;
+        public event Action OnGameSequenceRestart;
         public event Action OnInGameUIAnimationsCompleted;
 
         [Inject]
@@ -141,7 +141,7 @@ namespace UnitedTechCase.Scripts.Managers
                 Ease.InOutQuad);
 
             startButton.gameObject.SetActive(false);
-            OnStartButtonMovedOffScreen?.Invoke();
+            OnGameSequenceStart?.Invoke();
         }
 
         public async void AnimateInGameUI()
@@ -167,9 +167,9 @@ namespace UnitedTechCase.Scripts.Managers
 
         private async void ResetUIPositions()
         {
+            OnGameSequenceRestart?.Invoke();
             _animationCancellationToken?.Cancel();
             _animationCancellationToken = new CancellationTokenSource();
-            OnGameRestart?.Invoke();
             endButton.enabled = false;
             DisableAllSpecialPowerButtons();
 

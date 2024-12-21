@@ -1,5 +1,6 @@
-using System;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using UnitedTechCase.Scripts.Interfaces;
 using UnityEngine;
 using Zenject;
@@ -23,19 +24,19 @@ namespace UnitedTechCase.Scripts.Managers
         private Transform bulletTransformParent;
 
         private const int InitializeCharacterSize = 2;
+        private const int InitializeBulletSize = 20;
         private readonly Vector3 _characterSpawnPosition = new(0f, 0f, 2.13f);
         private readonly Vector3 _characterCenterPosition = new(0f, 0f, -13.41f);
 
         private readonly List<Character> _activeCharacters = new();
-        private readonly List<Bullet> _bullets = new();
-
-        public event Action OnGameSequenceStarted;
-        public event Action OnGameSequenceRestarted;
+        private readonly List<Bullet> _activeBullets = new();
 
         private ObjectPoolManager _objectPoolManager;
         private UIManager _uiManager;
         private SpecialPowerManager _specialPowerManager;
         private GameData _gameData;
+
+        private CancellationTokenSource _fireCancellationTokenSource;
 
         [Inject]
         public void Construct(ObjectPoolManager objectPoolManager, UIManager uiManager,
@@ -55,28 +56,33 @@ namespace UnitedTechCase.Scripts.Managers
 
         private void SubscribeEvents()
         {
-            _uiManager.OnStartButtonMovedOffScreen += OnOnStartGame;
+            _uiManager.OnGameSequenceStart += OnStartGame;
+            _uiManager.OnGameSequenceRestart += OnRestartGame;
             _uiManager.OnInGameUIAnimationsCompleted += StartCharacterFiring;
-            _uiManager.OnGameRestart += OnRestart;
             _specialPowerManager.OnPowerAdded += HandlePowerAdded;
         }
 
         private void UnSubscribeEvents()
         {
-            _uiManager.OnStartButtonMovedOffScreen -= OnOnStartGame;
+            _uiManager.OnGameSequenceStart -= OnStartGame;
+            _uiManager.OnGameSequenceRestart -= OnRestartGame;
             _uiManager.OnInGameUIAnimationsCompleted -= StartCharacterFiring;
-            _uiManager.OnGameRestart -= OnRestart;
             _specialPowerManager.OnPowerAdded -= HandlePowerAdded;
+
+            _fireCancellationTokenSource?.Cancel();
+            _fireCancellationTokenSource?.Dispose();
         }
 
         private void CreatePoolObjects()
         {
             _objectPoolManager.CreatePool<Character>(characterPrefab.gameObject, InitializeCharacterSize,
                 characterTransformParent);
-            _objectPoolManager.CreatePool<Bullet>(bulletPrefab.gameObject, 50, bulletTransformParent);
+            _objectPoolManager.CreatePool<Bullet>(bulletPrefab.gameObject, InitializeBulletSize, bulletTransformParent);
         }
 
-        private void OnOnStartGame()
+        #region CharacterMove
+
+        private void OnStartGame()
         {
             var newCharacter = SpawnCharacter(_characterSpawnPosition, Quaternion.Euler(0f, -180f, 0f));
             MoveCharacter(newCharacter, _characterCenterPosition);
@@ -99,27 +105,65 @@ namespace UnitedTechCase.Scripts.Managers
         public void SpawnAdditionalCharacter()
         {
             var spawnPosition = _characterCenterPosition + new Vector3(2.5f, 0f, -1.3f);
-            var newCharacter = SpawnCharacter(spawnPosition, Quaternion.Euler(0f, -180f, 0f));
-            newCharacter.StartFiring();
+            SpawnCharacter(spawnPosition, Quaternion.Euler(0f, -180f, 0f));
         }
+
+        #endregion
+
+        #region CharacterFire
 
         private void StartCharacterFiring()
         {
-            _activeCharacters[0].StartFiring();
-            OnGameSequenceStarted?.Invoke();
+            ResetActiveBullets();
+            StopCharacterFiring();
+            _fireCancellationTokenSource = new CancellationTokenSource();
+            CharacterFireAsync(_fireCancellationTokenSource).Forget();
         }
 
-        private void OnRestart()
+        private async UniTaskVoid CharacterFireAsync(CancellationTokenSource cancellationTokenSource)
         {
+            while (!cancellationTokenSource.IsCancellationRequested)
+            {
+                foreach (var character in _activeCharacters)
+                {
+                    character.Fire();
+                }
+
+                await UniTask.Delay(Mathf.RoundToInt(_gameData.BaseFireRate * 1000),
+                    cancellationToken: cancellationTokenSource.Token);
+            }
+        }
+
+        private void ResetActiveBullets()
+        {
+            foreach (var bullet in _activeBullets)
+            {
+                bullet.ReturnToPool();
+            }
+
+            _activeBullets.Clear();
+        }
+
+        private void StopCharacterFiring()
+        {
+            _fireCancellationTokenSource?.Cancel();
+        }
+
+        #endregion
+
+        private void OnRestartGame()
+        {
+            StopCharacterFiring();
+
             foreach (var character in _activeCharacters)
             {
                 character.OnGameEnd(_characterSpawnPosition);
             }
 
             _activeCharacters.Clear();
+
             _gameData.ResetToDefault();
             _specialPowerManager.ResetPowers();
-            OnGameSequenceRestarted?.Invoke();
         }
 
         private void HandlePowerAdded(ISpecialPower power)
@@ -129,6 +173,11 @@ namespace UnitedTechCase.Scripts.Managers
             {
                 character.Initialize(_gameData);
             }
+        }
+
+        public void RegisterBullet(Bullet bullet)
+        {
+            _activeBullets.Add(bullet);
         }
 
         private void OnDestroy()

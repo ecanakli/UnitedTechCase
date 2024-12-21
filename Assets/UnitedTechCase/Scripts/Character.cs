@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
@@ -13,30 +14,13 @@ namespace UnitedTechCase.Scripts
         private GameData _gameData;
 
         private CancellationTokenSource _moveCancellationTokenSource;
-        private CancellationTokenSource _fireCancellationTokenSource;
 
         public void Initialize(GameData gameData)
         {
             _gameData = gameData;
         }
 
-        public void StartFiring()
-        {
-            CancelFire();
-            _fireCancellationTokenSource = new CancellationTokenSource();
-            FireContinuously(_fireCancellationTokenSource.Token).Forget();
-        }
-
-        private async UniTaskVoid FireContinuously(CancellationToken token)
-        {
-            while (!token.IsCancellationRequested)
-            {
-                Fire();
-                await UniTask.Delay(Mathf.RoundToInt(_gameData.BaseFireRate * 1000), cancellationToken: token);
-            }
-        }
-
-        private void Fire()
+        public void Fire()
         {
             CreateBullet(firePoint.position, firePoint.rotation);
             CheckExtraBulletSpecialPower();
@@ -66,7 +50,7 @@ namespace UnitedTechCase.Scripts
         {
             if (_gameData.DoubleShotEnabled)
             {
-                DoubleShotBullet(position, rotation, _fireCancellationTokenSource.Token).Forget();
+                DoubleShotBullet(position, rotation).Forget();
             }
             else
             {
@@ -75,20 +59,29 @@ namespace UnitedTechCase.Scripts
             }
         }
 
-        private async UniTask DoubleShotBullet(Vector3 position, Quaternion rotation,
-            CancellationToken cancellationToken)
+        private async UniTask DoubleShotBullet(Vector3 position, Quaternion rotation)
         {
-            for (var i = 0; i < 2; i++)
+            try
             {
-                var bullet = ObjectPoolManager.Spawn<Bullet>(position, rotation);
-                bullet.Initialize(_gameData.BulletData, rotation);
-                await UniTask.Delay(100, cancellationToken: cancellationToken);
+                for (var i = 0; i < 2; i++)
+                {
+                    var bullet = ObjectPoolManager.Spawn<Bullet>(position, rotation);
+                    bullet.Initialize(_gameData.BulletData, rotation);
+                    await UniTask.Delay(100, cancellationToken: gameObject.GetCancellationTokenOnDestroy());
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.Log("Double Shot Bullet movement cancelled.");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Unexpected error in bullet movement: {ex}");
             }
         }
 
         public async void OnGameEnd(Vector3 movePosition)
         {
-            CancelFire();
             await Move(movePosition);
             ReturnToPool();
         }
@@ -113,29 +106,21 @@ namespace UnitedTechCase.Scripts
                 .AsyncWaitForCompletion().AsUniTask().AttachExternalCancellation(cancellationToken);
         }
 
+        public override void OnDeSpawned()
+        {
+            base.OnDeSpawned();
+            CancelMove();
+        }
+
         private void CancelMove()
         {
             _moveCancellationTokenSource?.Cancel();
         }
 
-        private void CancelFire()
-        {
-            _fireCancellationTokenSource?.Cancel();
-        }
-
-        public override void OnDeSpawned()
-        {
-            base.OnDeSpawned();
-            CancelFire();
-            CancelMove();
-        }
-
         private void OnDestroy()
         {
             _moveCancellationTokenSource?.Cancel();
-            _fireCancellationTokenSource?.Cancel();
             _moveCancellationTokenSource?.Dispose();
-            _fireCancellationTokenSource?.Dispose();
         }
     }
 }

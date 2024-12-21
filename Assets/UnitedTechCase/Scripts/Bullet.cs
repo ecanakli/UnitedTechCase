@@ -1,7 +1,9 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using UnitedTechCase.Scripts.Managers;
 using UnityEngine;
+using Zenject;
 
 namespace UnitedTechCase.Scripts
 {
@@ -9,7 +11,10 @@ namespace UnitedTechCase.Scripts
     {
         private float _speed;
         private Vector3 _direction;
-        private CancellationTokenSource _cancellationTokenSource;
+        private CancellationTokenSource _bulletMoveCancellationTokenSource;
+
+        [Inject]
+        private GameManager _gameManager;
 
         public void Initialize(BulletData bulletData, Quaternion rotation)
         {
@@ -20,15 +25,22 @@ namespace UnitedTechCase.Scripts
 
         private async UniTaskVoid StartMovement()
         {
-            _cancellationTokenSource?.Cancel();
-            _cancellationTokenSource = new CancellationTokenSource();
+            _bulletMoveCancellationTokenSource?.Cancel();
+            _bulletMoveCancellationTokenSource = new CancellationTokenSource();
 
             try
             {
-                while (!_cancellationTokenSource.Token.IsCancellationRequested)
+                while (!_bulletMoveCancellationTokenSource.Token.IsCancellationRequested)
                 {
                     transform.position += _direction * _speed * Time.deltaTime;
-                    await UniTask.Yield(_cancellationTokenSource.Token);
+
+                    if (IsOffScreen())
+                    {
+                        ReturnToPool();
+                        return;
+                    }
+
+                    await UniTask.Yield(_bulletMoveCancellationTokenSource.Token);
                 }
             }
             catch (OperationCanceledException)
@@ -41,17 +53,33 @@ namespace UnitedTechCase.Scripts
             }
         }
 
+        private bool IsOffScreen()
+        {
+            if (Camera.main == null)
+            {
+                return false;
+            }
+
+            var screenPosition = Camera.main.WorldToViewportPoint(transform.position);
+            return screenPosition.x < 0 || screenPosition.x > 1 || screenPosition.y < 0 || screenPosition.y > 1;
+        }
+
+        public override void OnSpawned()
+        {
+            base.OnSpawned();
+            _gameManager.RegisterBullet(this);
+        }
+
         public override void OnDeSpawned()
         {
             base.OnDeSpawned();
-            _cancellationTokenSource?.Cancel();
-            _cancellationTokenSource?.Dispose();
+            _bulletMoveCancellationTokenSource?.Cancel();
         }
 
         private void OnDestroy()
         {
-            _cancellationTokenSource?.Cancel();
-            _cancellationTokenSource?.Dispose();
+            _bulletMoveCancellationTokenSource?.Cancel();
+            _bulletMoveCancellationTokenSource?.Dispose();
         }
     }
 }
