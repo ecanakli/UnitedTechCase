@@ -78,25 +78,20 @@ namespace UnitedTechCase.Scripts.Managers
 
         private void OnOnStartGame()
         {
-            SpawnCharacter(_characterSpawnPosition, Quaternion.Euler(0f, 180f, 0f));
+            var newCharacter = SpawnCharacter(_characterSpawnPosition, Quaternion.Euler(0f, -180f, 0f));
+            MoveCharacter(newCharacter, _characterCenterPosition);
         }
 
-        private void SpawnCharacter(Vector3 position, Quaternion rotation)
+        private Character SpawnCharacter(Vector3 spawnPosition, Quaternion rotation)
         {
-            var character = _objectPoolManager.Spawn<Character>(position, rotation);
+            var character = _objectPoolManager.Spawn<Character>(spawnPosition, rotation);
             if (_characters.Count != InitializeCharacterSize)
             {
                 _characters.Add(character);
             }
 
             character.Initialize(_gameData);
-            MoveCharacter(character, _characterCenterPosition);
-        }
-
-        public void SpawnAdditionalCharacter()
-        {
-            var newPos = _characterCenterPosition + new Vector3(5f, 0f, 0f);
-            SpawnCharacter(newPos, Quaternion.Euler(0f, 180f, 0f));
+            return character;
         }
 
         private async void MoveCharacter(Character character, Vector3 movePosition)
@@ -105,13 +100,16 @@ namespace UnitedTechCase.Scripts.Managers
             _uiManager.AnimateInGameUI();
         }
 
+        public void SpawnAdditionalCharacter()
+        {
+            var spawnPosition = _characterCenterPosition + new Vector3(2.5f, 0f, -1.3f);
+            var newCharacter = SpawnCharacter(spawnPosition, Quaternion.Euler(0f, -180f, 0f));
+            newCharacter.StartFiring();
+        }
+
         private void StartCharacterFiring()
         {
-            foreach (var character in _characters)
-            {
-                character.StartFiring();
-            }
-
+            _characters[0].StartFiring();
             OnGameSequenceStarted?.Invoke();
         }
 

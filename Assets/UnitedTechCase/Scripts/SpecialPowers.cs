@@ -12,7 +12,7 @@ namespace UnitedTechCase.Scripts
 
         public void OnPowerAdded(GameManager gameManager, GameData gameData)
         {
-            gameData.BulletData.ExtraBullets = extraBulletCount;
+            gameData.BulletData.ModifyBullets(extraBulletCount);
         }
     }
 

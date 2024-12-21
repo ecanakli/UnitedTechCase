@@ -39,13 +39,7 @@ namespace UnitedTechCase.Scripts
         private void Fire()
         {
             CreateBullet(firePoint.position, firePoint.rotation);
-            CheckAndApplySpecialPowers();
-        }
-
-        private void CheckAndApplySpecialPowers()
-        {
             CheckExtraBulletSpecialPower();
-            CheckDoubleShotSpecialPower();
         }
 
         private void CheckExtraBulletSpecialPower()
@@ -55,34 +49,41 @@ namespace UnitedTechCase.Scripts
                 return;
             }
 
-            for (var i = 0; i < _gameData.BulletData.ExtraBullets; i++)
+            var totalExtraBullets = _gameData.BulletData.ExtraBullets;
+            var angleSpread = 90f;
+            var startAngle = -angleSpread / 2f;
+
+            for (var i = 0; i < totalExtraBullets; i++)
             {
-                var angle = (i == 0) ? -45f : 45f;
+                var angle = startAngle + (i * angleSpread / (totalExtraBullets - 1));
                 var rotation = Quaternion.Euler(firePoint.rotation.eulerAngles + new Vector3(0, angle, 0));
                 CreateBullet(firePoint.position, rotation);
             }
         }
 
-        private void CheckDoubleShotSpecialPower()
-        {
-            if (!_gameData.DoubleShotEnabled)
-            {
-                return;
-            }
-
-            DoubleShot().Forget();
-        }
-
-        private async UniTaskVoid DoubleShot()
-        {
-            await UniTask.Delay(100);
-            CreateBullet(firePoint.position, firePoint.rotation);
-        }
 
         private void CreateBullet(Vector3 position, Quaternion rotation)
         {
-            var bullet = ObjectPoolManager.Spawn<Bullet>(position, rotation);
-            bullet.Initialize(_gameData.BulletData);
+            if (_gameData.DoubleShotEnabled)
+            {
+                DoubleShotBullet(position, rotation, _fireCancellationTokenSource.Token).Forget();
+            }
+            else
+            {
+                var bullet = ObjectPoolManager.Spawn<Bullet>(position, rotation);
+                bullet.Initialize(_gameData.BulletData, rotation);
+            }
+        }
+
+        private async UniTask DoubleShotBullet(Vector3 position, Quaternion rotation,
+            CancellationToken cancellationToken)
+        {
+            for (var i = 0; i < 2; i++)
+            {
+                var bullet = ObjectPoolManager.Spawn<Bullet>(position, rotation);
+                bullet.Initialize(_gameData.BulletData, rotation);
+                await UniTask.Delay(100, cancellationToken: cancellationToken);
+            }
         }
 
         public async void OnGameEnd(Vector3 movePosition)

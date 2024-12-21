@@ -11,10 +11,10 @@ namespace UnitedTechCase.Scripts
         private Vector3 _direction;
         private CancellationTokenSource _cancellationTokenSource;
 
-        public void Initialize(BulletData bulletData)
+        public void Initialize(BulletData bulletData, Quaternion rotation)
         {
             _speed = bulletData.Speed;
-            _direction = bulletData.Direction.normalized;
+            _direction = rotation * bulletData.Direction.normalized;
             StartMovement().Forget();
         }
 
@@ -44,6 +44,12 @@ namespace UnitedTechCase.Scripts
         public override void OnDeSpawned()
         {
             base.OnDeSpawned();
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource?.Dispose();
+        }
+
+        private void OnDestroy()
+        {
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource?.Dispose();
         }

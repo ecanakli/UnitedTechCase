@@ -7,25 +7,46 @@ namespace UnitedTechCase.Scripts
     {
         [Header("Bullet Settings")]
         [Range(1f, 100f)]
-        public float Speed = 25f;
+        [SerializeField]
+        private float speed = 25f;
 
-        public Vector3 Direction = Vector3.back;
+        [SerializeField]
+        private Vector3 direction = Vector3.forward;
 
-        public int ExtraBullets;
+        [SerializeField]
+        private int extraBullets;
+
+        public float Speed
+        {
+            get => speed;
+            private set => speed = value;
+        }
+
+        public Vector3 Direction
+        {
+            get => direction;
+            private set => direction = value;
+        }
+
+        public int ExtraBullets
+        {
+            get => extraBullets;
+            private set => extraBullets = value;
+        }
 
         public void ModifySpeed(float multiplier)
         {
             Speed *= multiplier;
         }
 
-        public void ModifyDirection(Vector3 newDirection)
-        {
-            Direction = newDirection.normalized;
-        }
-
         public void ModifyBullets(int bulletCount)
         {
             ExtraBullets = bulletCount;
+        }
+
+        public void ModifyDirection(Vector3 newDirection)
+        {
+            Direction = newDirection.normalized;
         }
 
         public void ResetToDefaultValues()
