@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
@@ -69,8 +70,7 @@ namespace UnitedTechCase.Scripts.Managers
             _uiManager.OnInGameUIAnimationsCompleted -= StartCharacterFiring;
             _specialPowerManager.OnPowerAdded -= HandlePowerAdded;
 
-            _fireCancellationTokenSource?.Cancel();
-            _fireCancellationTokenSource?.Dispose();
+            DisposeFireToken();
         }
 
         private void CreatePoolObjects()
@@ -98,8 +98,20 @@ namespace UnitedTechCase.Scripts.Managers
 
         private async void MoveCharacter(Character character, Vector3 movePosition)
         {
-            await character.Move(movePosition);
-            _uiManager.AnimateInGameUI();
+            try
+            {
+                await character.Move(movePosition)
+                    .AttachExternalCancellation(gameObject.GetCancellationTokenOnDestroy());
+                _uiManager.AnimateInGameUI();
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.Log("Character movement cancelled due to object destruction.");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Unexpected error during character movement: {ex}");
+            }
         }
 
         public void SpawnAdditionalCharacter()
@@ -147,6 +159,12 @@ namespace UnitedTechCase.Scripts.Managers
         private void StopCharacterFiring()
         {
             _fireCancellationTokenSource?.Cancel();
+        }
+
+        private void DisposeFireToken()
+        {
+            _fireCancellationTokenSource?.Cancel();
+            _fireCancellationTokenSource?.Dispose();
         }
 
         #endregion

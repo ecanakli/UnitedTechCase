@@ -138,7 +138,7 @@ namespace UnitedTechCase.Scripts.Managers
                 _startButtonRectTransform,
                 new Vector2(_startButtonOffScreenPositionLeft, _startButtonRectTransform.anchoredPosition.y),
                 0.5f,
-                Ease.InOutQuad);
+                Ease.InOutQuad).AttachExternalCancellation(_animationCancellationToken.Token);
 
             startButton.gameObject.SetActive(false);
             OnGameSequenceStart?.Invoke();
@@ -153,58 +153,91 @@ namespace UnitedTechCase.Scripts.Managers
                 specialPowerButtonsParent,
                 new Vector2(0f, 0f),
                 0.5f,
-                Ease.OutBounce);
+                Ease.OutBounce).AttachExternalCancellation(_animationCancellationToken.Token);
+            ;
 
             endButton.enabled = true;
             await PlayAnimation(
                 _endButtonRectTransform,
                 new Vector2(-35f, _endButtonRectTransform.anchoredPosition.y),
                 0.5f,
-                Ease.InOutQuad);
+                Ease.InOutQuad).AttachExternalCancellation(_animationCancellationToken.Token);
+            ;
 
             OnInGameUIAnimationsCompleted?.Invoke();
         }
 
         private async void ResetUIPositions()
         {
-            OnGameSequenceRestart?.Invoke();
             _animationCancellationToken?.Cancel();
             _animationCancellationToken = new CancellationTokenSource();
-            endButton.enabled = false;
-            DisableAllSpecialPowerButtons();
 
-            await PlayAnimation(
-                _endButtonRectTransform,
-                new Vector2(_endButtonInitialXPosition, _endButtonRectTransform.anchoredPosition.y),
-                0.5f,
-                Ease.InOutQuad);
+            try
+            {
+                OnGameSequenceRestart?.Invoke();
+                endButton.enabled = false;
+                DisableAllSpecialPowerButtons();
+                
+                await PlayAnimation(
+                    _endButtonRectTransform,
+                    new Vector2(_endButtonInitialXPosition, _endButtonRectTransform.anchoredPosition.y),
+                    0.5f,
+                    Ease.InOutQuad).AttachExternalCancellation(_animationCancellationToken.Token);
 
-            await PlayAnimation(
-                specialPowerButtonsParent,
-                new Vector2(0, -specialPowerButtonsParent.rect.height),
-                0.5f,
-                Ease.OutBounce);
+                await PlayAnimation(
+                    specialPowerButtonsParent,
+                    new Vector2(0, -specialPowerButtonsParent.rect.height),
+                    0.5f,
+                    Ease.OutBounce).AttachExternalCancellation(_animationCancellationToken.Token);
 
-            startButton.gameObject.SetActive(true);
-            _startButtonRectTransform.anchoredPosition = new Vector2(_startButtonOffScreenPositionRight,
-                _startButtonRectTransform.anchoredPosition.y);
-            await PlayAnimation(
-                _startButtonRectTransform,
-                new Vector2(0f, _startButtonRectTransform.anchoredPosition.y),
-                0.5f,
-                Ease.InOutQuad);
+                if (!this || !gameObject.activeInHierarchy)
+                {
+                    return;
+                }
 
-            startButton.enabled = true;
-            ResetUIButtons();
+                startButton.gameObject.SetActive(true);
+                _startButtonRectTransform.anchoredPosition = new Vector2(
+                    _startButtonOffScreenPositionRight,
+                    _startButtonRectTransform.anchoredPosition.y);
+
+                await PlayAnimation(
+                    _startButtonRectTransform,
+                    new Vector2(0f, _startButtonRectTransform.anchoredPosition.y),
+                    0.5f,
+                    Ease.InOutQuad).AttachExternalCancellation(_animationCancellationToken.Token);
+
+                startButton.enabled = true;
+                ResetUIButtons();
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.Log("Reset UI operation cancelled.");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Unexpected error during ResetUIPositions: {ex}");
+            }
         }
+
 
         private async UniTask PlayAnimation(RectTransform target, Vector2 targetPosition, float duration, Ease easeType)
         {
-            await target
-                .DOAnchorPos(targetPosition, duration)
-                .SetEase(easeType)
-                .AsyncWaitForCompletion().AsUniTask()
-                .AttachExternalCancellation(_animationCancellationToken.Token);
+            try
+            {
+                await target
+                    .DOAnchorPos(targetPosition, duration)
+                    .SetEase(easeType)
+                    .AsyncWaitForCompletion().AsUniTask()
+                    .AttachExternalCancellation(_animationCancellationToken.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.Log("Animation cancelled.");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Unexpected error during animation: {ex}");
+            }
         }
 
         private void ResetUIButtons()
@@ -214,7 +247,10 @@ namespace UnitedTechCase.Scripts.Managers
 
         private void OnDestroy()
         {
+            DOTween.KillAll();
+            DOTween.Clear(true);
             _animationCancellationToken?.Cancel();
+            _animationCancellationToken?.Dispose();
             RemoveListeners();
         }
     }

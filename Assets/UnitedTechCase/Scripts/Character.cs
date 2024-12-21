@@ -82,8 +82,22 @@ namespace UnitedTechCase.Scripts
 
         public async void OnGameEnd(Vector3 movePosition)
         {
-            await Move(movePosition);
-            ReturnToPool();
+            try
+            {
+                await Move(movePosition).AttachExternalCancellation(_moveCancellationTokenSource.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.Log("Character move operation was canceled.");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Unexpected error during OnGameEnd: {ex}");
+            }
+            finally
+            {
+                ReturnToPool();
+            }
         }
 
         public async UniTask Move(Vector3 movePosition)
