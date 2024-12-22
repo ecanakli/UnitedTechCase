@@ -8,11 +8,12 @@ namespace UnitedTechCase.Scripts.Managers
 {
     public class ObjectPoolManager : MonoBehaviour
     {
+        // Represents a single pool of objects for a specific prefab
         private class Pool
         {
-            public readonly Queue<IPoolable> Objects = new();
-            public readonly GameObject Prefab;
-            public readonly Transform Parent;
+            public readonly Queue<IPoolable> Objects = new(); // Queue to hold pooled objects
+            public readonly GameObject Prefab; // The prefab used to create new objects
+            public readonly Transform Parent; // Parent transform to organize objects in the hierarchy
 
             public Pool(GameObject prefab, Transform parent)
             {
@@ -21,7 +22,7 @@ namespace UnitedTechCase.Scripts.Managers
             }
         }
 
-        private readonly Dictionary<Type, Pool> _pools = new();
+        private readonly Dictionary<Type, Pool> _pools = new(); // To manage pools by type
         private DiContainer _container;
 
         [Inject]
@@ -30,6 +31,13 @@ namespace UnitedTechCase.Scripts.Managers
             _container = container;
         }
 
+        /// <summary>
+        /// Creates a pool for a specific type of IPoolable objects.
+        /// </summary>
+        /// <typeparam name="T">The type of objects to pool.</typeparam>
+        /// <param name="prefab">The prefab used to create new instances.</param>
+        /// <param name="initialSize">Initial number of objects to create.</param>
+        /// <param name="parent">Optional parent transform for organizing objects in the hierarchy.</param>
         public void CreatePool<T>(GameObject prefab, int initialSize, Transform parent = null)
             where T : Component, IPoolable
         {
@@ -51,6 +59,9 @@ namespace UnitedTechCase.Scripts.Managers
             _pools[typeof(T)] = pool;
         }
 
+        /// <summary>
+        /// Spawns an object from the pool or creates a new one if the pool is empty.
+        /// </summary>
         public T Spawn<T>(Vector3 position, Quaternion rotation) where T : Component, IPoolable
         {
             if (!_pools.ContainsKey(typeof(T)))
@@ -63,6 +74,7 @@ namespace UnitedTechCase.Scripts.Managers
                 ? pool.Objects.Dequeue()
                 : InstantiateObject(pool.Prefab, pool.Parent);
 
+            // Ensure the object is of the expected type
             var component = instance as T;
             if (component == null)
             {
@@ -89,6 +101,9 @@ namespace UnitedTechCase.Scripts.Managers
             pool.Objects.Enqueue(instance);
         }
 
+        /// <summary>
+        /// Instantiates a new object using Zenject's DiContainer.
+        /// </summary>
         private IPoolable InstantiateObject(GameObject prefab, Transform parent)
         {
             var poolable = _container.InstantiatePrefabForComponent<IPoolable>(prefab, parent);

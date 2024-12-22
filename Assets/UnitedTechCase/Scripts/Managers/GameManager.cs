@@ -18,7 +18,7 @@ namespace UnitedTechCase.Scripts.Managers
         [SerializeField]
         private Transform bulletTransformParent;
 
-        //Character Scene Settings
+        // Character Scene Settings
         private const int InitializeCharacterSize = 2;
         private const int InitializeBulletSize = 20;
         private readonly Vector3 _characterSpawnPosition = new(0f, 0f, 8f);
@@ -54,6 +54,7 @@ namespace UnitedTechCase.Scripts.Managers
             CreatePoolObjects();
         }
 
+        // Subscribes to events from UIManager and SpecialPowerManager
         private void SubscribeEvents()
         {
             _uiManager.OnGameSequenceStart += OnStartGame;
@@ -62,6 +63,7 @@ namespace UnitedTechCase.Scripts.Managers
             _specialPowerManager.OnPowerAdded += HandlePowerAdded;
         }
 
+        // Unsubscribes from events to avoid memory leaks
         private void UnSubscribeEvents()
         {
             _uiManager.OnGameSequenceStart -= OnStartGame;
@@ -117,6 +119,9 @@ namespace UnitedTechCase.Scripts.Managers
 
         public void SpawnAdditionalCharacter()
         {
+            // Spawns an additional character either to the right or left of the main character
+            // The offsetX determines whether the character spawns on the right (+_newCharacterOffset.x) 
+            // or on the left (-_newCharacterOffset.x) of the main character.
             var offsetX = Random.value > 0.5f ? _newCharacterOffset.x : -_newCharacterOffset.x;
             var spawnPosition = _characterCenterPosition +
                                 new Vector3(offsetX, _newCharacterOffset.y, _newCharacterOffset.z);
@@ -124,6 +129,7 @@ namespace UnitedTechCase.Scripts.Managers
             SpawnCharacter(1, spawnPosition, _characterRotation);
         }
 
+        // Ensures the position is within the screen bounds
         private Vector3 ClampPositionToScreen(Vector3 position)
         {
             var bottomLeft =
@@ -201,6 +207,7 @@ namespace UnitedTechCase.Scripts.Managers
             _specialPowerManager.ResetPowers();
         }
 
+        // Updates character data when a new power is added
         private void HandlePowerAdded(ISpecialPower power)
         {
             power.OnPowerAdded(this, _gameData);

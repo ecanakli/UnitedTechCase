@@ -8,6 +8,7 @@ namespace UnitedTechCase.Scripts
 {
     public class Character : PooledObject
     {
+        // Holds different character models for swapping visual appearances.
         [SerializeField]
         private GameObject[] characterModels;
 
@@ -23,6 +24,9 @@ namespace UnitedTechCase.Scripts
             _gameData = gameData;
         }
 
+        /// <summary>
+        /// Activates a specific character model based on the provided index.
+        /// </summary>
         public void SetCharacterModel(int modelIndex)
         {
             for (var i = 0; i < characterModels.Length; i++)
@@ -37,6 +41,9 @@ namespace UnitedTechCase.Scripts
             CheckExtraBulletSpecialPower();
         }
 
+        /// <summary>
+        /// Creates extra bullets with spread angles if the special power is enabled.
+        /// </summary>
         private void CheckExtraBulletSpecialPower()
         {
             if (_gameData.BulletData.ExtraBullets <= 0)
@@ -70,6 +77,7 @@ namespace UnitedTechCase.Scripts
             }
         }
 
+        // Fire two bullets sequentially.
         private async UniTask DoubleShotBullet(Vector3 position, Quaternion rotation)
         {
             try
@@ -91,6 +99,9 @@ namespace UnitedTechCase.Scripts
             }
         }
 
+        /// <summary>
+        /// Handles the end of the game, moving the character to a position and returning it to the pool.
+        /// </summary>
         public async void OnGameEnd(Vector3 movePosition)
         {
             try

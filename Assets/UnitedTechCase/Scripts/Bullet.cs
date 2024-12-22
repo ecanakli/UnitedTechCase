@@ -16,6 +16,9 @@ namespace UnitedTechCase.Scripts
         [Inject]
         private GameManager _gameManager;
 
+        /// <summary>
+        /// Initializes the bullet with new data and start's the bullet's movement with its direction.
+        /// </summary>
         public void Initialize(BulletData bulletData, Quaternion rotation)
         {
             _speed = bulletData.Speed;
@@ -34,6 +37,7 @@ namespace UnitedTechCase.Scripts
                 {
                     transform.position += _direction * _speed * Time.deltaTime;
 
+                    // Return the bullet to the pool if its outside of the screen
                     if (IsOffScreen())
                     {
                         ReturnToPool();
@@ -53,6 +57,9 @@ namespace UnitedTechCase.Scripts
             }
         }
 
+        /// <summary>
+        /// Checks if the bullet is outside the visible screen area.
+        /// </summary>
         private bool IsOffScreen()
         {
             if (Camera.main == null)

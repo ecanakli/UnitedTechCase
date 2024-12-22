@@ -77,42 +77,8 @@ namespace UnitedTechCase.Scripts.Managers
 
             _specialPowerManager.OnMaxPowersReached -= DisableAllSpecialPowerButtons;
         }
-
-        private void OnSpecialPowerButtonClicked(ISpecialPower power)
-        {
-            _specialPowerManager.SelectPower(power);
-
-            foreach (var specialPowerButton in specialPowerButtons)
-            {
-                if (specialPowerButton.Power == power)
-                {
-                    specialPowerButton.OnClicked();
-                }
-            }
-        }
-
-        private void SetAllButtonsInteractable(bool state)
-        {
-            foreach (var specialPowerButton in specialPowerButtons)
-            {
-                if (specialPowerButton.Button.interactable != state)
-                {
-                    specialPowerButton.SetInteractable(true);
-                }
-            }
-        }
-
-        private void DisableAllSpecialPowerButtons()
-        {
-            foreach (var specialPowerButton in specialPowerButtons)
-            {
-                if (specialPowerButton.Button.interactable)
-                {
-                    specialPowerButton.DisableButton();
-                }
-            }
-        }
-
+        
+        // Caches RectTransform components for optimized access
         private void CacheUIElements()
         {
             _startButtonRectTransform = startButton.GetComponent<RectTransform>();
@@ -126,6 +92,7 @@ namespace UnitedTechCase.Scripts.Managers
             _endButtonInitialXPosition = _endButtonRectTransform.anchoredPosition.x;
         }
 
+        // Sets the initial UI positions at the start of the game
         private void InitializeUIState()
         {
             _startButtonRectTransform.anchoredPosition = new Vector2(0f, _startButtonRectTransform.anchoredPosition.y);
@@ -134,6 +101,52 @@ namespace UnitedTechCase.Scripts.Managers
             specialPowerButtonsParent.anchoredPosition = new Vector2(0, -specialPowerButtonsParent.rect.height);
         }
 
+        #region SpecialPowerButtons
+
+        // Handles a special power button click and notifies the SpecialPowerManager
+        private void OnSpecialPowerButtonClicked(ISpecialPower power)
+        {
+            _specialPowerManager.SelectPower(power);
+
+            foreach (var specialPowerButton in specialPowerButtons)
+            {
+                if (specialPowerButton.Power == power)
+                {
+                    specialPowerButton.OnClicked();
+                }
+            }
+        }
+
+        // Enables or disables all special power buttons
+        private void SetAllButtonsInteractable(bool state)
+        {
+            foreach (var specialPowerButton in specialPowerButtons)
+            {
+                if (specialPowerButton.Button.interactable != state)
+                {
+                    specialPowerButton.SetInteractable(true);
+                }
+            }
+        }
+
+        // Disables all special power buttons (used when the max powers are selected)
+        private void DisableAllSpecialPowerButtons()
+        {
+            foreach (var specialPowerButton in specialPowerButtons)
+            {
+                if (specialPowerButton.Button.interactable)
+                {
+                    specialPowerButton.DisableButton();
+                }
+            }
+        }
+
+        #endregion
+
+
+        #region InGameUIAnimations
+
+        // Start Game Sequence
         private async void MoveStartButtonOffScreen()
         {
             _animationCancellationToken?.Cancel();
@@ -161,8 +174,9 @@ namespace UnitedTechCase.Scripts.Managers
                 Debug.LogError($"Unexpected error in MoveStartButtonOffScreen: {ex}");
             }
         }
-
-
+        
+        
+        // Starts UI animations after the character reaches its position
         public async void AnimateInGameUI()
         {
             _animationCancellationToken?.Cancel();
@@ -196,6 +210,7 @@ namespace UnitedTechCase.Scripts.Managers
             }
         }
 
+        // Restart Game Sequence
         private async void ResetUIPositions()
         {
             _animationCancellationToken?.Cancel();
@@ -263,6 +278,8 @@ namespace UnitedTechCase.Scripts.Managers
                 Debug.LogError($"Unexpected error during animation: {ex}");
             }
         }
+
+        #endregion
 
         private void ResetUIButtons()
         {
