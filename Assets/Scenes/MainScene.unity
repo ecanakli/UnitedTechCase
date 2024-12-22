@@ -857,7 +857,7 @@ GameObject:
   - component: {fileID: 429636466}
   - component: {fileID: 429636465}
   m_Layer: 0
-  m_Name: Plane
+  m_Name: Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -905,7 +905,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: a7a4c8b9ce3645648870c1e9f7bf2ac0, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2562,6 +2562,6 @@ SceneRoots:
   - {fileID: 832575519}
   - {fileID: 1794881460}
   - {fileID: 1733017079}
-  - {fileID: 1804304848}
   - {fileID: 1694138464}
   - {fileID: 429636468}
+  - {fileID: 1804304848}
