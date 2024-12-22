@@ -9,6 +9,9 @@ namespace UnitedTechCase.Scripts
     public class Character : PooledObject
     {
         [SerializeField]
+        private GameObject[] characterModels;
+
+        [SerializeField]
         private Transform firePoint;
 
         private GameData _gameData;
@@ -18,6 +21,14 @@ namespace UnitedTechCase.Scripts
         public void Initialize(GameData gameData)
         {
             _gameData = gameData;
+        }
+
+        public void SetCharacterModel(int modelIndex)
+        {
+            for (var i = 0; i < characterModels.Length; i++)
+            {
+                characterModels[i].SetActive(i == modelIndex);
+            }
         }
 
         public void Fire()
@@ -124,6 +135,15 @@ namespace UnitedTechCase.Scripts
         {
             base.OnDeSpawned();
             CancelMove();
+            DisableCharacterModels();
+        }
+
+        private void DisableCharacterModels()
+        {
+            foreach (var mainCharacter in characterModels)
+            {
+                mainCharacter.gameObject.SetActive(false);
+            }
         }
 
         private void CancelMove()

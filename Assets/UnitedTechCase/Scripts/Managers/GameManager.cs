@@ -76,22 +76,24 @@ namespace UnitedTechCase.Scripts.Managers
         {
             _objectPoolManager.CreatePool<Character>(_gameData.CharacterPrefab.gameObject, InitializeCharacterSize,
                 characterTransformParent);
-            _objectPoolManager.CreatePool<Bullet>(_gameData.BulletPrefab.gameObject, InitializeBulletSize, bulletTransformParent);
+            _objectPoolManager.CreatePool<Bullet>(_gameData.BulletPrefab.gameObject, InitializeBulletSize,
+                bulletTransformParent);
         }
 
         #region CharacterMove
 
         private void OnStartGame()
         {
-            var newCharacter = SpawnCharacter(_characterSpawnPosition, _characterRotation);
+            var newCharacter = SpawnCharacter(0, _characterSpawnPosition, _characterRotation);
             MoveCharacter(newCharacter, _characterCenterPosition);
         }
 
-        private Character SpawnCharacter(Vector3 spawnPosition, Quaternion rotation)
+        private Character SpawnCharacter(int characterModelIndex, Vector3 spawnPosition, Quaternion rotation)
         {
             var character = _objectPoolManager.Spawn<Character>(spawnPosition, rotation);
             _activeCharacters.Add(character);
             character.Initialize(_gameData);
+            character.SetCharacterModel(characterModelIndex);
             return character;
         }
 
@@ -119,7 +121,7 @@ namespace UnitedTechCase.Scripts.Managers
             var spawnPosition = _characterCenterPosition +
                                 new Vector3(offsetX, _newCharacterOffset.y, _newCharacterOffset.z);
             spawnPosition = ClampPositionToScreen(spawnPosition);
-            SpawnCharacter(spawnPosition, _characterRotation);
+            SpawnCharacter(1, spawnPosition, _characterRotation);
         }
 
         private Vector3 ClampPositionToScreen(Vector3 position)
