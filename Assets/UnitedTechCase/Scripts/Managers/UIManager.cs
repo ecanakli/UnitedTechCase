@@ -106,7 +106,10 @@ namespace UnitedTechCase.Scripts.Managers
         {
             foreach (var specialPowerButton in specialPowerButtons)
             {
-                specialPowerButton.SetInteractable(false);
+                if (specialPowerButton.Button.interactable)
+                {
+                    specialPowerButton.DisableButton();
+                }
             }
         }
 
