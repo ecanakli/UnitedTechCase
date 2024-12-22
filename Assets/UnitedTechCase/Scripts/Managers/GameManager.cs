@@ -11,13 +11,6 @@ namespace UnitedTechCase.Scripts.Managers
 {
     public class GameManager : MonoBehaviour
     {
-        [Header("Prefab Instances")]
-        [SerializeField]
-        private Character characterPrefab;
-
-        [SerializeField]
-        private Bullet bulletPrefab;
-
         [Header("Prefab Parents")]
         [SerializeField]
         private Transform characterTransformParent;
@@ -81,9 +74,9 @@ namespace UnitedTechCase.Scripts.Managers
 
         private void CreatePoolObjects()
         {
-            _objectPoolManager.CreatePool<Character>(characterPrefab.gameObject, InitializeCharacterSize,
+            _objectPoolManager.CreatePool<Character>(_gameData.CharacterPrefab.gameObject, InitializeCharacterSize,
                 characterTransformParent);
-            _objectPoolManager.CreatePool<Bullet>(bulletPrefab.gameObject, InitializeBulletSize, bulletTransformParent);
+            _objectPoolManager.CreatePool<Bullet>(_gameData.BulletPrefab.gameObject, InitializeBulletSize, bulletTransformParent);
         }
 
         #region CharacterMove

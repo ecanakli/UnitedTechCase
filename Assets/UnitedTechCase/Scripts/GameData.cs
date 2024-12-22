@@ -5,6 +5,13 @@ namespace UnitedTechCase.Scripts
     [CreateAssetMenu(fileName = "New Game Data", menuName = "Game/GameData")]
     public class GameData : ScriptableObject
     {
+        [Header("Character Prefabs")]
+        [SerializeField]
+        private Character characterPrefab;
+
+        [SerializeField]
+        private Bullet bulletPrefab;
+        
         [Header("Character Stats")]
         [SerializeField]
         private float baseFireRate = 2f;
@@ -22,6 +29,9 @@ namespace UnitedTechCase.Scripts
         private BulletData _runtimeBulletData;
 
         public BulletData BulletData => _runtimeBulletData;
+        
+        public Character CharacterPrefab => characterPrefab;
+        public Bullet BulletPrefab => bulletPrefab;
 
         public void Initialize()
         {
