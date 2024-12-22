@@ -54,6 +54,14 @@ namespace UnitedTechCase.Scripts.Managers
             CreatePoolObjects();
         }
 
+        private void Start()
+        {
+#if UNITY_IOS || UNITY_ANDROID
+            Application.targetFrameRate = 60;
+            Debug.Log("Frame rate set to 60 for mobile.");
+#endif
+        }
+
         // Subscribes to events from UIManager and SpecialPowerManager
         private void SubscribeEvents()
         {
