@@ -2,7 +2,7 @@
 
 Here you can find the game builds and gameplay video with the link below:
 
-- [https://drive.google.com/drive/folders/1opHJ28ABxIeEPJNKlehDai_gTe8fErcB?usp=sharing](#)
+https://drive.google.com/drive/folders/1opHJ28ABxIeEPJNKlehDai_gTe8fErcB?usp=sharing
 ---
 ## Project Details
 
