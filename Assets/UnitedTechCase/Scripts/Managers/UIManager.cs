@@ -4,6 +4,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnitedTechCase.Scripts.Interfaces;
+using UnitedTechCase.Scripts.SpecialPowers;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
@@ -77,7 +78,7 @@ namespace UnitedTechCase.Scripts.Managers
 
             _specialPowerManager.OnMaxPowersReached -= DisableAllSpecialPowerButtons;
         }
-        
+
         // Caches RectTransform components for optimized access
         private void CacheUIElements()
         {
@@ -174,8 +175,8 @@ namespace UnitedTechCase.Scripts.Managers
                 Debug.LogError($"Unexpected error in MoveStartButtonOffScreen: {ex}");
             }
         }
-        
-        
+
+
         // Starts UI animations after the character reaches its position
         public async void AnimateInGameUI()
         {

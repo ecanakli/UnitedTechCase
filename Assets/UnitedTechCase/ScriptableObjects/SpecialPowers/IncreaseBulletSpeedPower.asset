@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: 4514ec2b091d48b40b4fa20fb9397ba7, type: 3}
   m_Name: IncreaseBulletSpeedPower
-  m_EditorClassIdentifier: Assembly-CSharp:UnitedTechCase.Scripts:IncreaseBulletSpeedPower
+  m_EditorClassIdentifier: 
   speedMultiplier: 1.5

@@ -2,7 +2,7 @@ using UnitedTechCase.Scripts.Interfaces;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace UnitedTechCase.Scripts
+namespace UnitedTechCase.Scripts.SpecialPowers
 {
     public class SpecialPowerButton : MonoBehaviour
     {

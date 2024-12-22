@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: d7532e857e43f1646b8ad0be3c4fcd5e, type: 3}
   m_Name: IncreaseFireRatePower
-  m_EditorClassIdentifier: Assembly-CSharp:UnitedTechCase.Scripts:IncreaseFireRatePower
+  m_EditorClassIdentifier: 
   fireRateMultiplier: 0.5

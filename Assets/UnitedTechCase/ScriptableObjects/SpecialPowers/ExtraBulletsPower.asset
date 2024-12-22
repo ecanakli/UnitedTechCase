@@ -9,6 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e9741c32c5030e54ab956a2cd4dbab99, type: 3}
+  m_Script: {fileID: 11500000, guid: a8adb517bad6e3f44969a25488670a5a, type: 3}
   m_Name: ExtraBulletsPower
   m_EditorClassIdentifier: 
+  extraBulletCount: 2
