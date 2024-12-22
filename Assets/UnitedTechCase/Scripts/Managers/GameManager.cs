@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using UnitedTechCase.Scripts.Interfaces;
 using UnityEngine;
 using Zenject;
+using Random = UnityEngine.Random;
 
 namespace UnitedTechCase.Scripts.Managers
 {
@@ -24,20 +25,24 @@ namespace UnitedTechCase.Scripts.Managers
         [SerializeField]
         private Transform bulletTransformParent;
 
+        //Character Scene Settings
         private const int InitializeCharacterSize = 2;
         private const int InitializeBulletSize = 20;
-        private readonly Vector3 _characterSpawnPosition = new(0f, 0f, 2.13f);
-        private readonly Vector3 _characterCenterPosition = new(0f, 0f, -13.41f);
+        private readonly Vector3 _characterSpawnPosition = new(0f, 0f, 8f);
+        private readonly Vector3 _characterCenterPosition = Vector3.zero;
+        private readonly Quaternion _characterRotation = Quaternion.Euler(0f, -180f, 0f);
+        private readonly Vector3 _newCharacterOffset = new(1.55f, 0f, -0.65f);
 
         private readonly List<Character> _activeCharacters = new();
         private readonly List<Bullet> _activeBullets = new();
+
+        private CancellationTokenSource _fireCancellationTokenSource;
 
         private ObjectPoolManager _objectPoolManager;
         private UIManager _uiManager;
         private SpecialPowerManager _specialPowerManager;
         private GameData _gameData;
-
-        private CancellationTokenSource _fireCancellationTokenSource;
+        private Camera _mainCamera;
 
         [Inject]
         public void Construct(ObjectPoolManager objectPoolManager, UIManager uiManager,
@@ -51,6 +56,7 @@ namespace UnitedTechCase.Scripts.Managers
 
         private void Awake()
         {
+            _mainCamera = Camera.main;
             SubscribeEvents();
             CreatePoolObjects();
         }
@@ -84,7 +90,7 @@ namespace UnitedTechCase.Scripts.Managers
 
         private void OnStartGame()
         {
-            var newCharacter = SpawnCharacter(_characterSpawnPosition, Quaternion.Euler(0f, -180f, 0f));
+            var newCharacter = SpawnCharacter(_characterSpawnPosition, _characterRotation);
             MoveCharacter(newCharacter, _characterCenterPosition);
         }
 
@@ -116,8 +122,24 @@ namespace UnitedTechCase.Scripts.Managers
 
         public void SpawnAdditionalCharacter()
         {
-            var spawnPosition = _characterCenterPosition + new Vector3(2.5f, 0f, -1.3f);
-            SpawnCharacter(spawnPosition, Quaternion.Euler(0f, -180f, 0f));
+            var offsetX = Random.value > 0.5f ? _newCharacterOffset.x : -_newCharacterOffset.x;
+            var spawnPosition = _characterCenterPosition +
+                                new Vector3(offsetX, _newCharacterOffset.y, _newCharacterOffset.z);
+            spawnPosition = ClampPositionToScreen(spawnPosition);
+            SpawnCharacter(spawnPosition, _characterRotation);
+        }
+
+        private Vector3 ClampPositionToScreen(Vector3 position)
+        {
+            var bottomLeft =
+                _mainCamera.ViewportToWorldPoint(new Vector3(0, 0, Mathf.Abs(_mainCamera.transform.position.z)));
+            var topRight =
+                _mainCamera.ViewportToWorldPoint(new Vector3(1, 1, Mathf.Abs(_mainCamera.transform.position.z)));
+
+            position.x = Mathf.Clamp(position.x, bottomLeft.x, topRight.x);
+            position.z = Mathf.Clamp(position.z, bottomLeft.z, topRight.z);
+
+            return position;
         }
 
         #endregion

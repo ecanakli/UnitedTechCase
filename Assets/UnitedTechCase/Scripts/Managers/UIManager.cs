@@ -25,12 +25,16 @@ namespace UnitedTechCase.Scripts.Managers
         [SerializeField]
         private RectTransform specialPowerButtonsParent;
 
+        [SerializeField]
+        private float buttonAnimationDuration = 0.5f;
+
         private RectTransform _startButtonRectTransform;
         private RectTransform _endButtonRectTransform;
 
         private float _startButtonOffScreenPositionLeft;
         private float _startButtonOffScreenPositionRight;
         private float _endButtonInitialXPosition;
+        private const float EndButtonInGameXPosition = -35f;
 
         private CancellationTokenSource _animationCancellationToken;
 
@@ -137,7 +141,7 @@ namespace UnitedTechCase.Scripts.Managers
             await PlayAnimation(
                 _startButtonRectTransform,
                 new Vector2(_startButtonOffScreenPositionLeft, _startButtonRectTransform.anchoredPosition.y),
-                0.5f,
+                buttonAnimationDuration,
                 Ease.InOutQuad).AttachExternalCancellation(_animationCancellationToken.Token);
 
             startButton.gameObject.SetActive(false);
@@ -152,17 +156,15 @@ namespace UnitedTechCase.Scripts.Managers
             await PlayAnimation(
                 specialPowerButtonsParent,
                 new Vector2(0f, 0f),
-                0.5f,
-                Ease.OutBounce).AttachExternalCancellation(_animationCancellationToken.Token);
-            ;
+                buttonAnimationDuration,
+                Ease.OutExpo).AttachExternalCancellation(_animationCancellationToken.Token);
 
             endButton.enabled = true;
             await PlayAnimation(
                 _endButtonRectTransform,
-                new Vector2(-35f, _endButtonRectTransform.anchoredPosition.y),
-                0.5f,
+                new Vector2(EndButtonInGameXPosition, _endButtonRectTransform.anchoredPosition.y),
+                buttonAnimationDuration,
                 Ease.InOutQuad).AttachExternalCancellation(_animationCancellationToken.Token);
-            ;
 
             OnInGameUIAnimationsCompleted?.Invoke();
         }
@@ -177,18 +179,18 @@ namespace UnitedTechCase.Scripts.Managers
                 OnGameSequenceRestart?.Invoke();
                 endButton.enabled = false;
                 DisableAllSpecialPowerButtons();
-                
+
                 await PlayAnimation(
                     _endButtonRectTransform,
                     new Vector2(_endButtonInitialXPosition, _endButtonRectTransform.anchoredPosition.y),
-                    0.5f,
+                    buttonAnimationDuration,
                     Ease.InOutQuad).AttachExternalCancellation(_animationCancellationToken.Token);
 
                 await PlayAnimation(
                     specialPowerButtonsParent,
                     new Vector2(0, -specialPowerButtonsParent.rect.height),
-                    0.5f,
-                    Ease.OutBounce).AttachExternalCancellation(_animationCancellationToken.Token);
+                    buttonAnimationDuration,
+                    Ease.OutExpo).AttachExternalCancellation(_animationCancellationToken.Token);
 
                 if (!this || !gameObject.activeInHierarchy)
                 {
@@ -203,7 +205,7 @@ namespace UnitedTechCase.Scripts.Managers
                 await PlayAnimation(
                     _startButtonRectTransform,
                     new Vector2(0f, _startButtonRectTransform.anchoredPosition.y),
-                    0.5f,
+                    buttonAnimationDuration,
                     Ease.InOutQuad).AttachExternalCancellation(_animationCancellationToken.Token);
 
                 startButton.enabled = true;

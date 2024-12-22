@@ -8,7 +8,10 @@ namespace UnitedTechCase.Scripts
         [Header("Bullet Settings")]
         [Range(1f, 100f)]
         [SerializeField]
-        private float speed = 25f;
+        private float speed = 20f;
+
+        [SerializeField]
+        private float angleSpread = 90f;
 
         [SerializeField]
         private Vector3 direction = Vector3.forward;
@@ -17,6 +20,7 @@ namespace UnitedTechCase.Scripts
         private int extraBullets;
 
         private float _defaultSpeed;
+        private float _defaultAngleSpread;
         private Vector3 _defaultDirection;
         private int _defaultExtraBullets;
 
@@ -24,6 +28,12 @@ namespace UnitedTechCase.Scripts
         {
             get => speed;
             private set => speed = value;
+        }
+
+        public float AngleSpread
+        {
+            get => angleSpread;
+            private set => angleSpread = value;
         }
 
         public Vector3 Direction
@@ -46,6 +56,7 @@ namespace UnitedTechCase.Scripts
         private void CacheDefaultValues()
         {
             _defaultSpeed = speed;
+            _defaultAngleSpread = angleSpread;
             _defaultDirection = direction;
             _defaultExtraBullets = extraBullets;
         }
@@ -53,6 +64,7 @@ namespace UnitedTechCase.Scripts
         public void ResetToDefaultValues()
         {
             Speed = _defaultSpeed;
+            AngleSpread = _defaultAngleSpread;
             Direction = _defaultDirection;
             ExtraBullets = _defaultExtraBullets;
         }

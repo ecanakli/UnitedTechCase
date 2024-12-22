@@ -34,7 +34,7 @@ namespace UnitedTechCase.Scripts
             }
 
             var totalExtraBullets = _gameData.BulletData.ExtraBullets;
-            var angleSpread = 90f;
+            var angleSpread = _gameData.BulletData.AngleSpread;
             var startAngle = -angleSpread / 2f;
 
             for (var i = 0; i < totalExtraBullets; i++)
@@ -105,8 +105,8 @@ namespace UnitedTechCase.Scripts
             CancelMove();
             _moveCancellationTokenSource = new CancellationTokenSource();
             RotateTowards(movePosition, _moveCancellationTokenSource.Token).Forget();
-            await transform.DOMove(movePosition, 0.5f)
-                .SetEase(Ease.Linear)
+            await transform.DOMove(movePosition, 1f)
+                .SetEase(Ease.OutQuad)
                 .AsyncWaitForCompletion().AsUniTask().AttachExternalCancellation(_moveCancellationTokenSource.Token);
         }
 
